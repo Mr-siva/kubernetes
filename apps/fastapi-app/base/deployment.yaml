@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-app
+  labels:
+    app: fastapi-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fastapi-app
+  template:
+    metadata:
+      labels:
+        app: fastapi-app
+    spec:
+      containers:
+      - name: fastapi
+        image: hashicorp/http-echo:latest
+        args:
+          - "-text=Hello from ArgoCD! 🚀"
+          - "-listen=:8080"
+        ports:
+        - containerPort: 8080
