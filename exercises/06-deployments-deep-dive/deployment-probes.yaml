@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-probes
+  labels:
+    app: webapp-probes
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: webapp-probes
+  template:
+    metadata:
+      labels:
+        app: webapp-probes
+    spec:
+      containers:
+      - name: webapp
+        image: hashicorp/http-echo:latest
+        args:
+          - "-text=Healthy!"
+          - "-listen=:8080"
+        ports:
+        - containerPort: 8080
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5      # wait 5s after startup before first check
+          periodSeconds: 10           # check every 10s
+          failureThreshold: 3         # 3 failures in a row → KILL and restart
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3      # wait 3s before first check
+          periodSeconds: 5            # check every 5s
+          failureThreshold: 2         # 2 failures → remove from Service

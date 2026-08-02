@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+  labels:
+    app: webapp
+spec:
+  replicas: 4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1            # at most 1 EXTRA pod during update (4+1=5)
+      maxUnavailable: 1      # at most 1 pod DOWN during update (4-1=3)
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: hashicorp/http-echo:latest
+        args:
+          - "-text=VERSION 2"
+          - "-listen=:8080"
+        ports:
+        - containerPort: 8080

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-resources
+  labels:
+    app: webapp-resources
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: webapp-resources
+  template:
+    metadata:
+      labels:
+        app: webapp-resources
+    spec:
+      containers:
+      - name: webapp
+        image: hashicorp/http-echo:latest
+        args:
+          - "-text=Resource Limited!"
+          - "-listen=:8080"
+        ports:
+        - containerPort: 8080
+
+        resources:
+          requests:
+            cpu: 100m            # 100 millicores = 0.1 CPU (10% of 1 core)
+            memory: 64Mi         # 64 megabytes minimum
+          limits:
+            cpu: 200m            # max 0.2 CPU — pod gets throttled beyond this
+            memory: 128Mi        # max 128MB — pod gets OOMKilled beyond this
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          failureThreshold: 2
