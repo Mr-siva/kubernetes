@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: db-consumer
+spec:
+  containers:
+  - name: app
+    image: busybox
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - name: db-creds
+      mountPath: /etc/secrets
+      readOnly: true
+  volumes:
+  - name: db-creds
+    secret:
+      secretName: db-secret

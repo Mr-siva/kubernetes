@@ -74,10 +74,28 @@ ExternalSecret.spec.target.name          ==  Pod.volumes.secret.secretName
 ```
 
 ## Key commands
-(fill in after the hands-on)
+```bash
+# install ESO
+helm repo add external-secrets https://charts.external-secrets.io
+helm repo update
+helm install external-secrets external-secrets/external-secrets -n external-secrets --create-namespace
+
+# check the chain
+kubectl get clustersecretstore fake-store
+kubectl get externalsecret db-external-secret
+kubectl get secret db-secret -o jsonpath='{.data.username}' | base64 -d; echo
+
+# read the mounted files inside the pod (Git Bash needs MSYS_NO_PATHCONV=1, see gotchas)
+MSYS_NO_PATHCONV=1 kubectl exec db-consumer -- cat /etc/secrets/username
+```
 
 ## Practice YAMLs
-- See .yaml files in this folder
+- `cluster-secret-store.yaml` — ClusterSecretStore using the built-in `fake` provider (no AWS needed for local practice)
+- `external-secret.yaml` — ExternalSecret pulling `username`/`password` out of the fake store's JSON blob
+- `pod.yaml` — Pod mounting `db-secret` as files under `/etc/secrets`
 
 ## Gotchas / mistakes I made
-(fill in after the hands-on)
+- `ClusterSecretStore`/`ExternalSecret` apiVersion is `external-secrets.io/v1`, not `v1beta1` — current ESO only serves `v1` (check with `kubectl get crd clustersecretstores.external-secrets.io -o jsonpath='{.spec.versions}'` if apply ever says "no matches for kind").
+- Right after `helm install`, the `cert-controller` and `webhook` pods show `0/1` for ~30s while the webhook cert is issued. `ClusterSecretStore`/`ExternalSecret` applies can fail validation until all 3 ESO pods are `1/1`.
+- **Fake provider requires an exact `version` match.** Unlike a real provider (where omitting `remoteRef.version` means "latest"), the fake provider errors with `Secret does not exist` if the store entry has `version: "v1"` and the ExternalSecret's `remoteRef` doesn't also specify `version: "v1"`. This is fake-provider-specific behavior, not how AWS/Vault work.
+- Git Bash rewrites absolute-looking paths (`/etc/secrets/username`) into Windows paths before they reach `kubectl exec`/`kubectl apply -f -`-style args. Prefix the command with `MSYS_NO_PATHCONV=1` when passing a container path as an argument.

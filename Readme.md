@@ -54,13 +54,14 @@ e/kubernetes/
     ├── 03-configmaps-secrets/
     ├── 04-external-secrets/
     ├── 05-services-ingress/
-    ├── 06-deployments-deep-dive/      ← NEXT
-    ├── 07-persistent-volumes/
-    ├── 08-rbac-security/
-    ├── 09-helm/
-    ├── 10-statefulsets/
-    ├── 11-monitoring/
-    └── 12-cicd-argocd/
+    ├── 06-deployments-deep-dive/
+    ├── 07-scheduling-taints-tolerations/
+    ├── 08-persistent-volumes/
+    ├── 09-rbac-security/
+    ├── 10-helm/
+    ├── 11-statefulsets/
+    ├── 12-monitoring/
+    └── 13-cicd-argocd/
 ```
 
 **Why this structure?**
