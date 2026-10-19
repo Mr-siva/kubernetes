@@ -16,9 +16,26 @@ spec:
     spec:
       containers:
       - name: fastapi
-        image: hashicorp/http-echo:latest
-        args:
-          - "-text=Hello from ArgoCD! 🚀"
-          - "-listen=:8080"
+        image: fastapi-app:v1
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
